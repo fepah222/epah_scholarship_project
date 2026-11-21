@@ -1,1 +1,26 @@
-{% extends 'base.html' %}{% block content %}<h1>Scholarship review</h1>{% for s in scholarships %}<article class="card"><h3>{{ s.title }}</h3><p>{{ s.institution.institution_name }} · {{ s.approval_status }}</p><form method="post" action="{{ url_for('admin.review_scholarship',scholarship_id=s.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input name="reason" placeholder="Reason if rejected"><button class="button small" name="status" value="approved">Approve</button><button class="button danger small" name="status" value="rejected">Reject</button></form></article>{% else %}<p>No scholarship submissions.</p>{% endfor %}{% endblock %}
+{% extends 'base.html' %}
+{% block content %}
+<h1>Scholarship review</h1>
+<p class="muted">Review each institution submission before it becomes publicly visible.</p>
+{% for scholarship in scholarships %}
+  <article class="card">
+    <h3>{{ scholarship.title }}</h3>
+    <p>{{ scholarship.institution.institution_name }} · {{ scholarship.approval_status }} · {{ scholarship.publication_status }}</p>
+    <p>{{ scholarship.description|truncate(240) }}</p>
+    <p><b>Eligibility:</b> {{ scholarship.eligibility or 'Not provided' }}</p>
+    <p><b>Deadline:</b> {{ scholarship.application_deadline or 'Not specified' }}</p>
+    {% if scholarship.approval_status == 'pending' %}
+      <form method="post" action="{{ url_for('admin.review_scholarship', scholarship_id=scholarship.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label>Review note / rejection reason<input name="reason" maxlength="2000" placeholder="Optional note"></label>
+        <button class="button small" name="status" value="approved">Approve and publish</button>
+        <button class="button danger small" name="status" value="rejected">Reject</button>
+      </form>
+    {% elif scholarship.rejection_reason %}
+      <p><b>Review note:</b> {{ scholarship.rejection_reason }}</p>
+    {% endif %}
+  </article>
+{% else %}
+  <p>No scholarship submissions.</p>
+{% endfor %}
+{% endblock %}
