@@ -368,3 +368,22 @@
   .topbar > .mobile-theme-toggle { flex-basis:33px; width:33px; height:33px; }
   .mobile-menu > summary { min-width:54px; padding-left:7px; padding-right:7px; }
 }
+
+
+/* Menu dropdown visibility fix: prevent the responsive header from clipping it. */
+@media(max-width:850px) {
+  .topbar {
+    overflow:visible !important;
+    -webkit-overflow-scrolling:auto;
+  }
+  .topbar > .mobile-menu {
+    position:relative;
+    z-index:100;
+  }
+  .mobile-menu[open] .mobile-menu-panel {
+    display:block;
+    visibility:visible;
+    opacity:1;
+    z-index:101;
+  }
+}
