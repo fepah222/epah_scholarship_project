@@ -148,6 +148,8 @@ def apply(scholarship_id):
         flash("This scholarship deadline has passed.", "warning")
     elif scholarship.application_method == "external":
         flash("This scholarship uses an external application process. Use the institution's application link.", "info")
+    elif scholarship.available_positions is not None and Application.query.filter_by(scholarship_id=scholarship.id).count() >= scholarship.available_positions:
+        flash("All available positions for this scholarship have been filled.", "warning")
     elif Application.query.filter_by(
         scholarship_id=scholarship.id, student_id=profile.id
     ).first():
