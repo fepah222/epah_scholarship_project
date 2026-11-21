@@ -1,1 +1,64 @@
-{% extends 'base.html' %}{% block title %}Create account | Epah Scholarship{% endblock %}{% block content %}<div class="form-wrap"><p class="eyebrow">JOIN THE COMMUNITY</p><h1>Create your account</h1><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>Account type<select name="role"><option value="student">Student</option><option value="institution">Institution</option></select></label><label>Full name / institution name<input name="full_name" required maxlength="140"></label><label>Email address<input type="email" name="email" required></label><label>Password<input type="password" name="password" minlength="8" required></label><button class="button full">Create account</button></form><p class="muted">Already registered? <a href="{{ url_for('auth.login') }}">Log in</a></p></div>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Create account | Epah Scholarship{% endblock %}
+{% block content %}
+<div class="form-wrap">
+  <p class="eyebrow">JOIN THE COMMUNITY</p>
+  <h1>Create your account</h1>
+  <p class="muted">Register as a student or an institution.</p>
+  <form method="post" id="registrationForm">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Account type
+      <select name="role" required>
+        <option value="student">Student</option>
+        <option value="institution">Institution / School</option>
+      </select>
+    </label>
+    <label>Full name / institution name<input name="full_name" required maxlength="140" autocomplete="name"></label>
+    <label>Email address<input type="email" name="email" required maxlength="255" autocomplete="email"></label>
+    <label>Password
+      <span class="password-field">
+        <input id="registerPassword" type="password" name="password" minlength="12" required autocomplete="new-password">
+        <button class="password-toggle" type="button" data-password-toggle="registerPassword" aria-label="Show password" aria-pressed="false">Show</button>
+      </span>
+      <span class="password-hint" id="passwordStrength">Use at least 12 characters with a mix of letters, numbers and symbols.</span>
+    </label>
+    <label>Confirm password
+      <span class="password-field">
+        <input id="confirmPassword" type="password" name="confirm_password" minlength="12" required autocomplete="new-password">
+        <button class="password-toggle" type="button" data-password-toggle="confirmPassword" aria-label="Show password" aria-pressed="false">Show</button>
+      </span>
+    </label>
+    <button class="button full" type="submit">Create account</button>
+  </form>
+  <p class="muted">Already registered? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+</div>
+<script>
+document.querySelectorAll('[data-password-toggle]').forEach(function(button){
+  button.addEventListener('click',function(){
+    const field=document.getElementById(button.dataset.passwordToggle);
+    const reveal=field.type==='password';
+    field.type=reveal?'text':'password';
+    button.textContent=reveal?'Hide':'Show';
+    button.setAttribute('aria-label',reveal?'Hide password':'Show password');
+    button.setAttribute('aria-pressed',String(reveal));
+  });
+});
+const password=document.getElementById('registerPassword');
+const confirmPassword=document.getElementById('confirmPassword');
+const strength=document.getElementById('passwordStrength');
+password.addEventListener('input',function(){
+  const value=password.value;
+  let score=0;
+  if(value.length>=12)score++;
+  if(/[a-z]/.test(value)&&/[A-Z]/.test(value))score++;
+  if(/\d/.test(value))score++;
+  if(/[^A-Za-z0-9]/.test(value))score++;
+  strength.textContent=['Use at least 12 characters with a mix of letters, numbers and symbols.','Weak password','Fair password','Good password','Strong password'][score];
+});
+document.getElementById('registrationForm').addEventListener('submit',function(event){
+  if(password.value!==confirmPassword.value){event.preventDefault();confirmPassword.setCustomValidity('Passwords do not match.');confirmPassword.reportValidity();}
+  else confirmPassword.setCustomValidity('');
+});
+confirmPassword.addEventListener('input',function(){confirmPassword.setCustomValidity('');});
+</script>
+{% endblock %}
