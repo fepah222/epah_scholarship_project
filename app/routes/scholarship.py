@@ -57,7 +57,7 @@ def index():
 
 @bp.get("/<slug>")
 def detail(slug):
-    scholarship = public_scholarships_query().filter_by(slug=slug).first_or_404()
+    scholarship = public_scholarships_query().filter(Scholarship.slug == slug).first_or_404()
     already_applied = False
     if current_user.is_authenticated and current_user.role == "student":
         profile = StudentProfile.query.filter_by(user_id=current_user.id).first()
