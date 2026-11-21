@@ -184,3 +184,119 @@ def test_profile_image_upload_accepts_png_signature(app):
         saved = save_public_image(image, "test")
         assert saved.startswith("test/")
         assert (Path(app.config["PUBLIC_UPLOAD"]) / saved).is_file()
+
+
+def test_verified_institution_publishes_scholarship_immediately(client, app):
+    with app.app_context():
+        institution_user = make_user("institution", "Approved Institution", "approved@example.test")
+        institution = InstitutionProfile(
+            id=str(uuid.uuid4()), user_id=institution_user.id,
+            institution_name="Approved Institution",
+            verification_status="approved",
+        )
+        db.session.add(institution)
+        db.session.commit()
+        login_as(client, institution_user)
+
+        response = client.post("/scholarships/create", data={
+            "title": "Immediate Publication Award",
+            "description": "A public scholarship opportunity.",
+            "category": "Undergraduate",
+            "funding_type": "Full funding",
+        })
+
+        scholarship = Scholarship.query.filter_by(title="Immediate Publication Award").one()
+        assert response.status_code == 302
+        assert scholarship.approval_status == "approved"
+        assert scholarship.publication_status == "published"
+        guest = client
+        guest_response = guest.get(f"/scholarships/{scholarship.slug}")
+        assert guest_response.status_code == 200
+
+
+def test_unapproved_institution_cannot_publish_scholarship(client, app):
+    with app.app_context():
+        institution_user = make_user("institution", "Pending Institution", "pending@example.test")
+        institution = InstitutionProfile(
+            id=str(uuid.uuid4()), user_id=institution_user.id,
+            institution_name="Pending Institution",
+            verification_status="pending",
+        )
+        db.session.add(institution)
+        db.session.commit()
+        login_as(client, institution_user)
+
+        response = client.post("/scholarships/create", data={
+            "title": "Blocked Scholarship",
+            "description": "Should not be published.",
+        })
+
+        assert response.status_code == 302
+        assert Scholarship.query.filter_by(title="Blocked Scholarship").count() == 0
+
+
+def test_public_posts_are_visible_to_guests_but_restricted_posts_are_not(client, app):
+    from app.models import Post
+
+    with app.app_context():
+        _, institution, _, _, _ = scholarship_setup()
+        public_post = Post(
+            id=str(uuid.uuid4()), institution_id=institution.id,
+            content="Public institution announcement", visibility="public",
+            publication_status="published",
+        )
+        restricted_post = Post(
+            id=str(uuid.uuid4()), institution_id=institution.id,
+            content="Accepted applicants only announcement",
+            visibility="accepted_applicants", publication_status="published",
+        )
+        db.session.add_all([public_post, restricted_post])
+        db.session.commit()
+
+        response = client.get(f"/institutions/{institution.id}")
+        assert response.status_code == 200
+        assert b"Public institution announcement" in response.data
+        assert b"Accepted applicants only announcement" not in response.data
+
+
+def test_accepted_applicant_can_view_restricted_institution_post(client, app):
+    from app.models import Post
+
+    with app.app_context():
+        _, institution, student_user, student, scholarship = scholarship_setup()
+        application = Application(
+            id=str(uuid.uuid4()), scholarship_id=scholarship.id,
+            student_id=student.id, application_reference="EN-ACCEPTED001",
+            application_status="accepted",
+        )
+        restricted_post = Post(
+            id=str(uuid.uuid4()), institution_id=institution.id,
+            content="Welcome accepted scholars", visibility="accepted_applicants",
+            publication_status="published",
+        )
+        db.session.add_all([application, restricted_post])
+        db.session.commit()
+        login_as(client, student_user)
+
+        response = client.get(f"/institutions/{institution.id}")
+        assert response.status_code == 200
+        assert b"Welcome accepted scholars" in response.data
+
+
+def test_non_accepted_student_cannot_view_restricted_institution_post(client, app):
+    from app.models import Post
+
+    with app.app_context():
+        _, institution, student_user, _, _ = scholarship_setup()
+        restricted_post = Post(
+            id=str(uuid.uuid4()), institution_id=institution.id,
+            content="Private accepted scholars update", visibility="accepted_applicants",
+            publication_status="published",
+        )
+        db.session.add(restricted_post)
+        db.session.commit()
+        login_as(client, student_user)
+
+        response = client.get(f"/institutions/{institution.id}")
+        assert response.status_code == 200
+        assert b"Private accepted scholars update" not in response.data
