@@ -28,6 +28,31 @@
     <button class="theme-toggle" data-theme-toggle aria-label="Switch colour theme" title="Switch light/dark mode">☼</button>
   </nav>
   <button class="theme-toggle mobile-theme-toggle" data-theme-toggle aria-label="Switch colour theme">☼</button>
+  <details class="mobile-menu">
+    <summary aria-label="Open website menu"><span class="menu-bars" aria-hidden="true">☰</span><span>Menu</span></summary>
+    <div class="mobile-menu-panel">
+      <p class="mobile-menu-heading">Explore Epah Scholarship</p>
+      <a href="{{ url_for('home') }}">⌂ <span>Home</span></a>
+      <a href="{{ url_for('scholarships.index') }}">✧ <span>Scholarships</span></a>
+      {% if current_user.is_authenticated %}
+        {% if current_user.role == 'student' %}
+          <a href="{{ url_for('student.dashboard') }}">▣ <span>My dashboard</span></a>
+        {% elif current_user.role == 'institution' %}
+          <a href="{{ url_for('institution.dashboard') }}">▦ <span>Institution dashboard</span></a>
+        {% elif current_user.role == 'admin' %}
+          <a href="{{ url_for('admin.dashboard') }}">⚙ <span>Admin dashboard</span></a>
+        {% endif %}
+        <a href="{{ url_for('messaging.inbox') }}">✉ <span>Messages</span></a>
+        <form method="post" action="{{ url_for('auth.logout') }}" class="mobile-menu-logout">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit">↪ <span>Log out</span></button>
+        </form>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}">◎ <span>Log in</span></a>
+        <a href="{{ url_for('auth.register') }}">＋ <span>Create account</span></a>
+      {% endif %}
+    </div>
+  </details>
 </header>
 <main class="container">
   {% with messages=get_flashed_messages(with_categories=true) %}{% for category,message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}{% endwith %}
