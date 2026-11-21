@@ -37,12 +37,18 @@ def parse_optional_date(value, label):
         raise ValueError(f"{label} must be a valid date.")
 
 
+def public_scholarships_query():
+    return Scholarship.query.join(InstitutionProfile).filter(
+        Scholarship.approval_status == "approved",
+        Scholarship.publication_status == "published",
+        InstitutionProfile.verification_status == "approved",
+    )
+
+
 @bp.get("/")
 def index():
     search = request.args.get("q", "").strip()
-    query = Scholarship.query.filter_by(
-        approval_status="approved", publication_status="published"
-    )
+    query = public_scholarships_query()
     if search:
         query = query.filter(Scholarship.title.ilike(f"%{search}%"))
     scholarships = query.order_by(Scholarship.created_at.desc()).all()
@@ -51,9 +57,7 @@ def index():
 
 @bp.get("/<slug>")
 def detail(slug):
-    scholarship = Scholarship.query.filter_by(
-        slug=slug, approval_status="approved", publication_status="published"
-    ).first_or_404()
+    scholarship = public_scholarships_query().filter_by(slug=slug).first_or_404()
     already_applied = False
     if current_user.is_authenticated and current_user.role == "student":
         profile = StudentProfile.query.filter_by(user_id=current_user.id).first()
@@ -75,6 +79,9 @@ def create():
     if current_user.role != "institution":
         abort(403)
     institution = InstitutionProfile.query.filter_by(user_id=current_user.id).first_or_404()
+    if institution.verification_status != "approved":
+        flash("Your institution must be approved by an administrator before publishing scholarships.", "warning")
+        return redirect(url_for("institution.dashboard"))
 
     if request.method == "POST":
         title = request.form.get("title", "").strip()
@@ -116,12 +123,12 @@ def create():
             available_positions=positions,
             application_method="external" if external_url else "platform",
             external_application_url=external_url or None,
-            approval_status="pending",
-            publication_status="draft",
+            approval_status="approved",
+            publication_status="published",
         )
         db.session.add(scholarship)
         db.session.commit()
-        flash("Scholarship submitted for administrator review.", "success")
+        flash("Your scholarship is now published and visible to everyone.", "success")
         return redirect(url_for("institution.dashboard"))
 
     return render_template("scholarships/create.html")
@@ -132,13 +139,9 @@ def create():
 def apply(scholarship_id):
     if current_user.role != "student":
         abort(403)
-    scholarship = db.session.get(Scholarship, scholarship_id)
+    scholarship = public_scholarships_query().filter_by(id=scholarship_id).first()
     profile = StudentProfile.query.filter_by(user_id=current_user.id).first_or_404()
-    if (
-        not scholarship
-        or scholarship.approval_status != "approved"
-        or scholarship.publication_status != "published"
-    ):
+    if not scholarship:
         abort(404)
 
     today = date.today()
@@ -180,12 +183,8 @@ def save(scholarship_id):
     if current_user.role != "student":
         abort(403)
     profile = StudentProfile.query.filter_by(user_id=current_user.id).first_or_404()
-    scholarship = db.session.get(Scholarship, scholarship_id)
-    if (
-        not scholarship
-        or scholarship.approval_status != "approved"
-        or scholarship.publication_status != "published"
-    ):
+    scholarship = public_scholarships_query().filter_by(id=scholarship_id).first()
+    if not scholarship:
         abort(404)
 
     existing = SavedScholarship.query.filter_by(
