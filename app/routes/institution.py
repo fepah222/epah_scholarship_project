@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 
 from ..extensions import db
-from ..models import InstitutionProfile, Post, InstitutionFollow, Scholarship, Application
+from ..models import InstitutionProfile, Post, InstitutionFollow, Scholarship, Application, StudentProfile
 from ..uploads import save_public_image, remove_public_image
 
 bp = Blueprint("institution", __name__, url_prefix="/institutions")
@@ -115,12 +115,32 @@ def edit():
 @bp.get("/<string:profile_id>")
 def public_profile(profile_id):
     profile = db.session.get(InstitutionProfile, profile_id)
-    if not profile:
-        return render_template("errors/404.html"), 404
-    posts = (
-        Post.query.filter_by(institution_id=profile.id, publication_status="published")
-        .order_by(Post.is_pinned.desc(), Post.published_at.desc()).all()
+    if not profile or profile.verification_status != "approved":
+        abort(404)
+
+    visible_posts = Post.query.filter_by(
+        institution_id=profile.id, publication_status="published"
+    ).filter(
+        (Post.visibility == "public")
     )
+    if current_user.is_authenticated and current_user.role == "student":
+        student = StudentProfile.query.filter_by(user_id=current_user.id).first()
+        if student:
+            accepted = (
+                Application.query.join(Scholarship, Application.scholarship_id == Scholarship.id)
+                .filter(
+                    Application.student_id == student.id,
+                    Application.application_status == "accepted",
+                    Scholarship.institution_id == profile.id,
+                )
+                .first()
+            )
+            if accepted:
+                visible_posts = Post.query.filter_by(
+                    institution_id=profile.id, publication_status="published"
+                ).filter(Post.visibility.in_(["public", "accepted_applicants"]))
+
+    posts = visible_posts.order_by(Post.is_pinned.desc(), Post.published_at.desc()).all()
     followers = InstitutionFollow.query.filter_by(institution_id=profile.id).count()
     return render_template(
         "institution/public_profile.html", profile=profile,
