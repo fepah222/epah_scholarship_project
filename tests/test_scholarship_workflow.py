@@ -209,7 +209,7 @@ def test_verified_institution_publishes_scholarship_immediately(client, app):
         assert response.status_code == 302
         assert scholarship.approval_status == "approved"
         assert scholarship.publication_status == "published"
-        guest = client
+        guest = app.test_client()
         guest_response = guest.get(f"/scholarships/{scholarship.slug}")
         assert guest_response.status_code == 200
 
