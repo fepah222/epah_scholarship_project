@@ -25,9 +25,9 @@
     {% else %}
       <a href="{{ url_for('auth.login') }}">Log in</a><a class="button small" href="{{ url_for('auth.register') }}">Create account</a>
     {% endif %}
-    <button class="theme-toggle" id="themeToggle" aria-label="Switch colour theme" title="Switch light/dark mode">☼</button>
+    <button class="theme-toggle" data-theme-toggle aria-label="Switch colour theme" title="Switch light/dark mode">☼</button>
   </nav>
-  <button class="theme-toggle mobile-theme-toggle" id="mobileThemeToggle" aria-label="Switch colour theme">☼</button>
+  <button class="theme-toggle mobile-theme-toggle" data-theme-toggle aria-label="Switch colour theme">☼</button>
 </header>
 <main class="container">
   {% with messages=get_flashed_messages(with_categories=true) %}{% for category,message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}{% endwith %}
@@ -52,11 +52,5 @@
   {% endif %}
 </nav>
 <footer class="footer">Epah Scholarship <span>·</span> Connecting ambition with opportunity</footer>
-<script>
-(function(){
-  function toggleTheme(){const root=document.documentElement;const next=root.dataset.theme==='dark'?'light':'dark';root.dataset.theme=next;localStorage.setItem('epah-scholarship-theme',next);}
-  document.querySelectorAll('#themeToggle,#mobileThemeToggle').forEach(b=>b.addEventListener('click',toggleTheme));
-})();
-</script>
 </body>
 </html>
