@@ -1,21 +1,44 @@
 # Epah Scholarship
 
-Epah Scholarship is a Flask + SQLite scholarship discovery and educational networking application. It is packaged as a clean Windows/VS Code project folder named `epah_scholarship`.
+Epah Scholarship is a scholarship discovery and application platform built to connect students with educational opportunities and help institutions manage scholarship programmes.
 
-## Technology
+The application is built with Python, Flask, SQLAlchemy and SQLite, with a responsive web interface and role-based access for students, institutions and administrators.
 
-- Python 3.12–3.15 (use a stable Python release supported by the installed dependencies)
-- Flask, SQLAlchemy, Flask-Login, Flask-WTF, Flask-Migrate and Flask-SocketIO
-- SQLite only — no MySQL and no XAMPP
-- HTML, CSS, JavaScript and Jinja templates
-- Navy `#182B49`, warm white `#F8F6F0`, restrained gold `#D5A63C`
-- Light/dark theme support
+## Technology stack
 
-## Windows setup (VS Code / PowerShell)
+- **Backend:** Python, Flask, Flask-SQLAlchemy, Flask-Login, Flask-WTF and Flask-SocketIO
+- **Database:** SQLite
+- **Frontend:** HTML, CSS, JavaScript and Jinja templates
+- **Interface:** Responsive layout with light and dark themes
+- **Visual identity:** Deep navy, cyan, warm white and gold
 
-1. Extract the ZIP.
-2. In VS Code, choose **File → Open Folder** and open the `epah_scholarship` folder (the folder containing `run.py`).
-3. Open **Terminal → New Terminal**.
+## Core capabilities
+
+- Public scholarship directory and scholarship detail pages
+- Student and institution registration with role-aware authentication
+- Student profiles and institution public profiles
+- Institution scholarship submissions and administrator approval
+- Student scholarship applications, application history and saved opportunities
+- Institution-side application review
+- External application links for opportunities hosted by other organisations
+- Profile photo, institution logo and cover-image uploads
+- Institution posts, comments, reactions and student follows
+- Authenticated messaging for existing conversations
+- Responsive interface with persistent theme selection
+
+## Local development
+
+### Requirements
+
+- Python 3.12 or a later version supported by the project dependencies
+- Git
+- PowerShell on Windows, or a Bash-compatible terminal on Linux/macOS
+
+### Windows setup
+
+1. Clone or download this repository.
+2. Open the project directory in Visual Studio Code or another Python IDE.
+3. Open a PowerShell terminal in the directory containing `run.py`.
 4. Run:
 
 ```powershell
@@ -23,68 +46,121 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\install.ps1
 ```
 
-5. Start the application:
+5. Start the development server:
 
 ```powershell
 .\start.ps1
 ```
 
-6. Open `http://127.0.0.1:5000`. Keep the terminal open while using the app. Stop the server with `Ctrl+C`.
+6. Visit `http://127.0.0.1:5000`.
 
-The installer creates a local `.venv`, installs the pinned packages, creates `.env` with a generated secret key, creates required upload/instance folders, and runs automated tests. It does not install Python itself. It checks for Python 3.12, 3.13, 3.14 or 3.15 through the Windows Python Launcher or `python`.
+Keep the terminal open while using the development server. Press `Ctrl+C` to stop it.
 
-## First administrator
+The setup script creates a virtual environment, installs the packages listed in `requirements.txt`, prepares the required local folders and runs the configured setup checks. It does not install Python itself.
 
-Public registration is limited to student and institution roles. After setup, create the first administrator from the project root:
+### Manual setup
 
-```powershell
-.\.venv\Scripts\python.exe -m flask --app run.py create-admin
+If you prefer to configure the environment manually:
+
+```bash
+python -m venv .venv
 ```
 
-Follow the prompts. Use a unique email and a password of at least 12 characters.
+Activate the environment, then install dependencies:
 
-## Included functionality
+**Windows PowerShell**
+```powershell
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+```
 
-- Student and institution self-registration, role-aware login and a separate administrator sign-in page
-- Student and institution profile foundations
-- Institution public profiles and verification status
-- Institution posts, reactions, comments and student follows
-- Public scholarship directory accessible without login; student dashboards list every published scholarship
-- Institution scholarship submissions, administrator approval and student application tracking
-- External scholarship links can be opened by guests; platform applications require a free student account
-- Student profile-photo upload and institution logo/cover-image upload (JPG, PNG and WEBP; 8 MB request limit)
-- Student scholarship applications and saved scholarships
-- Authenticated Socket.IO messaging foundation for existing conversations
-- Notification, reminder, report and administrative audit data models
-- Responsive templates and navy/warm-white/gold theme with light/dark toggle
+**Linux / macOS**
+```bash
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+```
 
-## Known functional limitations
+Start the application with:
 
-This is a development baseline, not a production-ready service. The following workflows are not fully implemented: email verification and password-reset delivery; admin invitation issuance/acceptance; institution verification-document upload/review; secure private-document download; post/media gallery uploads beyond profile images; private application and verification document upload/download; conversation creation UX; notification dispatch and scheduled deadline workers; advanced application-review notifications; moderation/report handling; deployment hardening, backups and operational monitoring. Socket.IO messaging requires an existing conversation and participant records. These limitations are disclosed rather than represented as complete.
+```bash
+python run.py
+```
 
-## Database and files
+## Administrator account
 
-The default SQLite database is `instance/epah_scholarship.db`. It is created automatically on first launch. Uploaded files are stored under `uploads/public` and `uploads/private`. Do not delete the `instance` database once you begin using the platform. Back it up before schema migrations.
+Public registration is restricted to student and institution roles. Administrator accounts are created through the application CLI rather than public registration.
 
-The 29 model tables use explicit names consistent with all foreign-key references. `tests/test_schema.py` checks the complete table list and verifies that every foreign-key target resolves.
+From the project root, run:
+
+```bash
+python -m flask --app run.py create-admin
+```
+
+Follow the prompts and use a unique email address with a strong password of at least 12 characters. Administrators sign in at `/auth/admin-login`.
+
+## Database and uploaded files
+
+The default SQLite database is stored at:
+
+```text
+instance/epah_scholarship.db
+```
+
+Uploaded files are stored under the configured `uploads/` directory. These locations contain application data and must be preserved during code updates and deployments.
+
+Back up the database and uploaded files regularly. Before applying any database schema change, create a verified backup and use a controlled migration process. Do not delete the `instance/` or `uploads/` directories when updating application code.
 
 ## Tests
 
-```powershell
-.\.venv\Scripts\python.exe -m pytest -q
+Run the test suite from the project root:
+
+```bash
+python -m pytest -q
 ```
 
-The tests cover app health, public pages, route handling and the complete SQLAlchemy table/foreign-key graph.
+The repository includes tests for application setup, routes, database schema relationships and scholarship workflows. A successful deployment should be preceded by a passing test run in the target environment.
 
-## Before public deployment
+## Current implementation status
 
-Configure real email delivery, enforce verified accounts, rotate `SECRET_KEY`, use HTTPS, set `COOKIE_SECURE=true`, keep uploaded images on persistent storage, add image decoding/scanning and validate uploaded document contents, add and apply database migrations for schema changes, implement the outstanding workflows, and arrange secure database/file backups.
+The application is an active development project. Some operational workflows still require implementation and production validation, including:
 
+- Email verification and password-reset email delivery
+- Administrator invitation and account recovery workflows
+- Institution verification document submission and review
+- Private application-document upload and secure download
+- Post and gallery media management
+- User-initiated conversation creation and messaging enhancements
+- Notification delivery and scheduled scholarship-deadline reminders
+- Moderation, reporting and administrative audit workflows
+- Production monitoring, backup automation and deployment hardening
 
-## Administrator access
+These items should be completed and tested before the platform is opened for unrestricted public use.
 
-Create the first administrator using the CLI command above. Administrators sign in at `/auth/admin-login` (also linked in the navigation). Public registration deliberately does not offer an administrator role.
+## Production deployment checklist
 
-## Public scholarship access
+Before a public launch:
 
-Anyone can open the scholarship directory at `/scholarships/` and read approved, published opportunities without creating an account. Students can self-register and submit applications hosted on this platform. If an institution supplies an external application URL, visitors can follow that link directly without signing in.
+1. Configure a strong, unique application secret and store it outside source control.
+2. Enforce email verification and secure account recovery.
+3. Serve the application over HTTPS and enable secure cookie settings.
+4. Configure persistent storage and strict access controls for uploaded files.
+5. Validate and decode uploaded images; scan documents before accepting or serving them.
+6. Introduce and apply database migrations for schema changes.
+7. Set up automated, tested backups for the database and uploaded files.
+8. Run the full test suite in the production environment.
+9. Configure application logging, error monitoring and operational alerts.
+10. Complete the outstanding workflows listed above and conduct a security review.
+
+## Project structure
+
+```text
+app/          Flask application package, routes, models and templates
+docs/         Project documentation
+instance/     Local SQLite database
+tests/        Automated tests
+uploads/      Uploaded application files
+config.py     Application configuration
+requirements.txt
+run.py        Application entry point
+```
+
