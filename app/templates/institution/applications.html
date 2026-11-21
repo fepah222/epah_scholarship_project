@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Application review{% endblock %}
+{% block content %}
+<p class="eyebrow">INSTITUTION WORKSPACE</p>
+<h1>Scholarship applications</h1>
+<p class="muted">Applications shown here belong only to scholarships published by your institution.</p>
+{% for application in applications %}
+  <article class="card">
+    <h3>{{ application.scholarship.title }}</h3>
+    <p><b>Applicant:</b> {{ application.student.user.full_name if application.student.user else 'Student' }}</p>
+    <p><b>Reference:</b> {{ application.application_reference }}</p>
+    <p><b>Submitted:</b> {{ application.submitted_at.strftime('%d %b %Y') if application.submitted_at else 'Not recorded' }}</p>
+    <p><b>Status:</b> <span class="pill">{{ application.application_status|replace('_', ' ')|title }}</span></p>
+    <p><b>Cover letter:</b></p>
+    <p>{{ application.cover_letter or 'No cover letter provided.' }}</p>
+    {% if application.application_status not in ['accepted', 'rejected'] %}
+      <form method="post" action="{{ url_for('institution.review_application', application_id=application.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label>Feedback to applicant<textarea name="reviewer_comment" maxlength="5000">{{ application.reviewer_comment or '' }}</textarea></label>
+        <div class="actions">
+          <button class="button secondary small" name="status" value="under_review">Mark under review</button>
+          <button class="button small" name="status" value="accepted">Accept</button>
+          <button class="button danger small" name="status" value="rejected">Reject</button>
+        </div>
+      </form>
+    {% elif application.reviewer_comment %}
+      <p><b>Feedback:</b> {{ application.reviewer_comment }}</p>
+    {% endif %}
+  </article>
+{% else %}
+  <p class="muted">No applications have been submitted to your scholarships yet.</p>
+{% endfor %}
+<a class="button secondary" href="{{ url_for('institution.dashboard') }}">Back to dashboard</a>
+{% endblock %}
