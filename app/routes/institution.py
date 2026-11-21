@@ -115,7 +115,7 @@ def edit():
 @bp.get("/<string:profile_id>")
 def public_profile(profile_id):
     profile = db.session.get(InstitutionProfile, profile_id)
-    if not profile or profile.verification_status != "approved":
+    if not profile:
         return render_template("errors/404.html"), 404
     posts = (
         Post.query.filter_by(institution_id=profile.id, publication_status="published")
