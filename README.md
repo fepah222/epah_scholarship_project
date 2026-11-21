@@ -45,11 +45,14 @@ Follow the prompts. Use a unique email and a password of at least 12 characters.
 
 ## Included functionality
 
-- Student and institution registration and role-aware login
+- Student and institution self-registration, role-aware login and a separate administrator sign-in page
 - Student and institution profile foundations
 - Institution public profiles and verification status
 - Institution posts, reactions, comments and student follows
-- Scholarship directory, institution submissions and administrator review
+- Public scholarship directory accessible without login; student dashboards list every published scholarship
+- Institution scholarship submissions, administrator approval and student application tracking
+- External scholarship links can be opened by guests; platform applications require a free student account
+- Student profile-photo upload and institution logo/cover-image upload (JPG, PNG and WEBP; 8 MB request limit)
 - Student scholarship applications and saved scholarships
 - Authenticated Socket.IO messaging foundation for existing conversations
 - Notification, reminder, report and administrative audit data models
@@ -57,7 +60,7 @@ Follow the prompts. Use a unique email and a password of at least 12 characters.
 
 ## Known functional limitations
 
-This is a development baseline, not a production-ready service. The following workflows are not fully implemented: email verification and password-reset delivery; admin invitation issuance/acceptance; institution verification-document upload/review; secure private-document download; full media upload/gallery management; conversation creation UX; notification dispatch and scheduled deadline workers; full application-review workflow; moderation/report handling; deployment hardening, backups and operational monitoring. Socket.IO messaging requires an existing conversation and participant records. These limitations are disclosed rather than represented as complete.
+This is a development baseline, not a production-ready service. The following workflows are not fully implemented: email verification and password-reset delivery; admin invitation issuance/acceptance; institution verification-document upload/review; secure private-document download; post/media gallery uploads beyond profile images; private application and verification document upload/download; conversation creation UX; notification dispatch and scheduled deadline workers; advanced application-review notifications; moderation/report handling; deployment hardening, backups and operational monitoring. Socket.IO messaging requires an existing conversation and participant records. These limitations are disclosed rather than represented as complete.
 
 ## Database and files
 
@@ -75,4 +78,13 @@ The tests cover app health, public pages, route handling and the complete SQLAlc
 
 ## Before public deployment
 
-Configure real email delivery, enforce verified accounts, rotate `SECRET_KEY`, use HTTPS, set `COOKIE_SECURE=true`, validate uploaded file contents, add and apply database migrations for schema changes, implement the outstanding workflows, and arrange secure database/file backups.
+Configure real email delivery, enforce verified accounts, rotate `SECRET_KEY`, use HTTPS, set `COOKIE_SECURE=true`, keep uploaded images on persistent storage, add image decoding/scanning and validate uploaded document contents, add and apply database migrations for schema changes, implement the outstanding workflows, and arrange secure database/file backups.
+
+
+## Administrator access
+
+Create the first administrator using the CLI command above. Administrators sign in at `/auth/admin-login` (also linked in the navigation). Public registration deliberately does not offer an administrator role.
+
+## Public scholarship access
+
+Anyone can open the scholarship directory at `/scholarships/` and read approved, published opportunities without creating an account. Students can self-register and submit applications hosted on this platform. If an institution supplies an external application URL, visitors can follow that link directly without signing in.
