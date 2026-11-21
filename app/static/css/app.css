@@ -108,3 +108,27 @@
   .campus-hero-bottomline i{width:15px}
 }
 @media(prefers-reduced-motion:reduce){.campus-hero .editorial-brandline,.campus-hero h1,.campus-hero-copy>p,.campus-hero .editorial-actions,.campus-quick-links,.campus-hero-proof{animation:none}}
+
+
+/* Mobile usability correction: keep every action visible without sideways swiping. */
+@media(max-width:620px){
+  html,body{max-width:100%;overflow-x:clip}
+  .container{width:100%;min-width:0}
+  .campus-hero{width:100%;min-width:0}
+  .campus-hero .editorial-actions{
+    display:flex;flex-direction:column;align-items:stretch;
+    width:100%;max-width:100%;gap:10px
+  }
+  .campus-hero .editorial-actions>a{
+    display:flex;align-items:center;justify-content:center;
+    width:100%;max-width:100%;min-width:0;white-space:normal;
+    text-align:center;overflow-wrap:anywhere
+  }
+  .campus-quick-links{
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+    width:100%;max-width:100%;min-width:0
+  }
+  .campus-quick-links>a{min-width:0;white-space:normal;overflow-wrap:anywhere}
+  .mobile-bottom-nav{grid-template-columns:repeat(4,minmax(0,1fr));width:100%;max-width:100%}
+  .mobile-bottom-nav>a{min-width:0;white-space:normal;text-align:center}
+}
