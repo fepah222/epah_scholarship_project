@@ -1,4 +1,3 @@
-
 from datetime import datetime, timezone
 from ..extensions import db
 
@@ -22,6 +21,8 @@ class StudentProfile(db.Model):
     profile_visibility = db.Column(db.String(20), default="public")
     created_at = db.Column(db.DateTime(timezone=True), default=now)
     updated_at = db.Column(db.DateTime(timezone=True), default=now, onupdate=now)
+
+    user = db.relationship("User", backref=db.backref("student_profile", uselist=False))
 
 
 class StudentQualification(db.Model):
