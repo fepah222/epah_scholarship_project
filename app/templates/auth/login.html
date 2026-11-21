@@ -1,1 +1,21 @@
-{% extends 'base.html' %}{% block title %}Log in | Epah Scholarship{% endblock %}{% block content %}<div class="form-wrap"><p class="eyebrow">WELCOME BACK</p><h1>Log in to Epah Scholarship</h1><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>Email address<input type="email" name="email" required autocomplete="email"></label><label>Password<input type="password" name="password" required autocomplete="current-password"></label><label class="check"><input type="checkbox" name="remember"> Remember me</label><button class="button full">Log in</button></form><p class="muted">New here? <a href="{{ url_for('auth.register') }}">Create an account</a></p></div>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}{% if admin_login %}Administrator sign in{% else %}Log in{% endif %} | Epah Scholarship{% endblock %}
+{% block content %}
+<div class="form-wrap">
+  <p class="eyebrow">{% if admin_login %}ADMINISTRATOR ACCESS{% else %}WELCOME BACK{% endif %}</p>
+  <h1>{% if admin_login %}Administrator sign in{% else %}Log in to Epah Scholarship{% endif %}</h1>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Email address<input type="email" name="email" required autocomplete="username"></label>
+    <label>Password<input type="password" name="password" required autocomplete="current-password"></label>
+    <label class="check"><input type="checkbox" name="remember"> Remember me</label>
+    <button class="button full">Sign in</button>
+  </form>
+  {% if admin_login %}
+    <p class="muted"><a href="{{ url_for('auth.login') }}">Return to standard login</a></p>
+  {% else %}
+    <p class="muted">New here? <a href="{{ url_for('auth.register') }}">Create an account</a></p>
+    <p class="muted"><a href="{{ url_for('auth.admin_login') }}">Administrator login</a></p>
+  {% endif %}
+</div>
+{% endblock %}
