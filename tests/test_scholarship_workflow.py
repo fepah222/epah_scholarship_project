@@ -177,7 +177,7 @@ def test_profile_image_upload_accepts_png_signature(app):
 
     with app.app_context():
         image = FileStorage(
-            stream=BytesIO(b"\\x89PNG\\r\\n\\x1a\\n" + b"test-image-data"),
+            stream=BytesIO(b"\x89PNG\r\n\x1a\n" + b"test-image-data"),
             filename="profile.png",
             content_type="image/png",
         )
