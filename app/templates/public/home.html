@@ -1,34 +1,48 @@
 {% extends 'base.html' %}
-{% block title %}Epah Scholarship | Discover your next opportunity{% endblock %}
+{% block title %}Epah Scholarship | Find your opportunity{% endblock %}
 {% block content %}
-<section class="home-hero">
-  <div class="hero-copy">
-    <span class="hero-kicker"><i></i> YOUR NEXT CHAPTER STARTS HERE</span>
-    <h1>Big dreams deserve <em>real opportunities.</em></h1>
-    <p>Find scholarships, discover trusted institutions and take your next step with confidence.</p>
-    <div class="actions hero-actions">
-      <a class="button" href="{{ url_for('scholarships.index') }}">Explore scholarships <span>→</span></a>
-      {% if not current_user.is_authenticated %}<a class="hero-text-link" href="{{ url_for('auth.register') }}">Join the community <span>↗</span></a>{% endif %}
+<section class="editorial-hero">
+  <div class="editorial-copy">
+    <span class="editorial-brandline"><span class="brand-spark">✦</span> EPAH SCHOLARSHIP</span>
+    <h1>Your future<br>starts with an <em>opportunity.</em></h1>
+    <span class="gold-rule"></span>
+    <p>Discover scholarships, explore schools and connect with institutions that can help you take your next step.</p>
+    <div class="editorial-actions">
+      <a class="button editorial-primary" href="{{ url_for('scholarships.index') }}">Explore scholarships <span>→</span></a>
+      {% if not current_user.is_authenticated %}<a class="editorial-secondary" href="{{ url_for('auth.register') }}">Create your account ↗</a>{% endif %}
     </div>
-    <div class="hero-proof"><span class="proof-mark">✓</span><span>Opportunities from verified institutions</span></div>
+    <div class="editorial-trust"><span>✓</span> Opportunities from verified institutions</div>
+    <nav class="hero-side-links" aria-label="Explore Epah Scholarship">
+      <a href="#opportunities"><span>01</span> Scholarships <b>↗</b></a>
+      <a href="#institutions"><span>02</span> Institutions <b>↗</b></a>
+      {% if current_user.is_authenticated and current_user.role=='student' %}<a href="{{ url_for('student.dashboard') }}"><span>03</span> My dashboard <b>↗</b></a>{% else %}<a href="{{ url_for('auth.register') }}"><span>03</span> Student space <b>↗</b></a>{% endif %}
+    </nav>
   </div>
-  <div class="hero-visual">
-    <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=88" alt="University graduates celebrating their achievement" fetchpriority="high">
-    <div class="photo-note"><span class="note-icon">✦</span><span><b>Your future is worth investing in.</b><small>Discover what is possible.</small></span></div>
-    <div class="hero-stamp">LEARN<br><b>GROW</b><br>SUCCEED</div>
+  <div class="editorial-gallery">
+    <div class="editorial-main-photo">
+      <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1400&q=90" alt="Graduates celebrating at a university" fetchpriority="high">
+      <span class="photo-caption">A brighter future begins with a first step</span>
+      <span class="photo-number">01 / 03</span>
+    </div>
+    <div class="editorial-photo-row">
+      <a href="#institutions" class="editorial-thumb"><img src="https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=700&q=85" alt="University campus building"><span>Discover schools ↗</span></a>
+      <a href="#opportunities" class="editorial-thumb"><img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=700&q=85" alt="Students studying together"><span>Find opportunities ↗</span></a>
+    </div>
+    <div class="gallery-seal">LEARN<br><b>GROW</b><br>SUCCEED</div>
   </div>
-  <div class="hero-decoration"></div>
 </section>
 
-<section class="trust-strip">
-  <div><strong>01</strong><span>Discover opportunities</span></div>
-  <div><strong>02</strong><span>Connect with institutions</span></div>
-  <div><strong>03</strong><span>Move your future forward</span></div>
+<section class="editorial-benefits" aria-label="What you can do">
+  <div><span class="benefit-icon">✧</span><b>Discover</b><small>Find opportunities</small></div>
+  <div><span class="benefit-icon">⌂</span><b>Connect</b><small>Meet institutions</small></div>
+  <div><span class="benefit-icon">✓</span><b>Apply</b><small>Take your next step</small></div>
+  <div><span class="benefit-icon">◎</span><b>Grow</b><small>Build your future</small></div>
+  <a href="{{ url_for('scholarships.index') }}" class="benefit-cta">Start exploring <span>→</span></a>
 </section>
 
-<section class="home-section">
+<section class="home-section" id="opportunities">
   <div class="section-heading">
-    <div><p class="eyebrow">FRESH OPPORTUNITIES</p><h2>Scholarships to explore</h2><p class="section-intro">Find an opportunity that fits your ambition.</p></div>
+    <div><p class="eyebrow">FRESH OPPORTUNITIES</p><h2>Scholarships worth exploring</h2><p class="section-intro">Browse current opportunities and find the one that fits your goals.</p></div>
     <a class="section-link" href="{{ url_for('scholarships.index') }}">View all scholarships <span>→</span></a>
   </div>
   <div class="scholarship-grid">
@@ -53,9 +67,9 @@
   </div>
 </section>
 
-<section class="institution-section">
+<section class="institution-section" id="institutions">
   <div class="section-heading">
-    <div><p class="eyebrow">TRUSTED EDUCATION PARTNERS</p><h2>Meet the institutions</h2><p class="section-intro">Get to know the schools and organisations behind the opportunities.</p></div>
+    <div><p class="eyebrow">TRUSTED EDUCATION PARTNERS</p><h2>Explore institutions</h2><p class="section-intro">Tap a school to view its profile, updates and available scholarships.</p></div>
   </div>
   <div class="institution-grid">
     {% for i in institutions %}
@@ -63,6 +77,7 @@
         <div class="institution-cover">
           {% if i.cover_photo_path %}<img src="{{ url_for('media_file', filename=i.cover_photo_path) }}" alt="{{ i.institution_name }} campus" loading="lazy">
           {% else %}<img src="https://images.unsplash.com/photo-1564981797816-1043664bf78d?auto=format&fit=crop&w=800&q=82" alt="University campus" loading="lazy">{% endif %}
+          <span class="institution-open">View profile ↗</span>
         </div>
         <div class="institution-info">
           {% if i.logo_path %}<img class="institution-logo" src="{{ url_for('media_file', filename=i.logo_path) }}" alt="" loading="lazy">{% else %}<span class="institution-logo logo-fallback">{{ i.institution_name[:1] }}</span>{% endif %}
@@ -76,7 +91,7 @@
 </section>
 
 <section class="closing-banner">
-  <div><p class="eyebrow">YOUR JOURNEY, YOUR FUTURE</p><h2>There is an opportunity with your name on it.</h2><p>Start exploring today. Your next step could change everything.</p></div>
+  <div><p class="eyebrow">YOUR JOURNEY, YOUR FUTURE</p><h2>Take the first step towards something bigger.</h2><p>Explore opportunities and connect with institutions today.</p></div>
   <a class="button" href="{{ url_for('scholarships.index') }}">Find scholarships <span>→</span></a>
 </section>
 {% endblock %}
