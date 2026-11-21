@@ -14,15 +14,15 @@ The application is built with Python, Flask, SQLAlchemy and SQLite, with a respo
 
 ## Core capabilities
 
-- Public scholarship directory and scholarship detail pages
+- Public access to the platform, institution profiles, public institution posts and published scholarship details without requiring an account
 - Student and institution registration with role-aware authentication
 - Student profiles and institution public profiles
-- Institution scholarship submissions and administrator approval
+- Institution scholarship publishing: once an administrator approves an institution, it can publish scholarships immediately; published opportunities are visible to all visitors
 - Student scholarship applications, application history and saved opportunities
 - Institution-side application review
 - External application links for opportunities hosted by other organisations
 - Profile photo, institution logo and cover-image uploads
-- Institution posts, comments, reactions and student follows
+- Institution posts with audience controls: public posts are visible to everyone; restricted posts are visible only to students with an accepted application from that institution
 - Authenticated messaging for existing conversations
 - Responsive interface with persistent theme selection
 
@@ -88,7 +88,7 @@ python run.py
 
 ## Administrator account
 
-Public registration is restricted to student and institution roles. Administrator accounts are created through the application CLI rather than public registration.
+Public registration is restricted to student and institution roles. Administrator accounts are created or reset through the application CLI rather than public registration. Approved institutions can publish scholarship listings immediately. Each post can be public or restricted to students whose applications have been accepted by that institution.
 
 From the project root, run:
 
@@ -96,7 +96,7 @@ From the project root, run:
 python -m flask --app run.py create-admin
 ```
 
-Follow the prompts and use a unique email address with a strong password of at least 12 characters. Administrators sign in at `/auth/admin-login`.
+Follow the prompts and use a unique email address with a strong password of at least 12 characters. Administrators sign in at `/auth/admin-login`. To create or reset the designated administrator account interactively, run `python -m flask --app run.py setup-admin`; the command prompts for the email and password and never stores credentials in source code.
 
 ## Database and uploaded files
 
