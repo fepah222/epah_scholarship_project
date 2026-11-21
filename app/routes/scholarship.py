@@ -139,7 +139,7 @@ def create():
 def apply(scholarship_id):
     if current_user.role != "student":
         abort(403)
-    scholarship = public_scholarships_query().filter_by(id=scholarship_id).first()
+    scholarship = public_scholarships_query().filter(Scholarship.id == scholarship_id).first()
     profile = StudentProfile.query.filter_by(user_id=current_user.id).first_or_404()
     if not scholarship:
         abort(404)
