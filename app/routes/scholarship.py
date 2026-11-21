@@ -198,4 +198,4 @@ def save(scholarship_id):
             )
         )
     db.session.commit()
-    return redirect(request.referrer or url_for("scholarships.index"))
+    return redirect(url_for("scholarships.index"))
