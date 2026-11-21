@@ -3,10 +3,15 @@
 <p class="eyebrow">INSTITUTION WORKSPACE</p>
 <h1>{{ profile.institution_name }}</h1>
 <p>Verification status: <span class="pill">{{ profile.verification_status }}</span></p>
+{% if profile.verification_status != 'approved' %}
+  <div class="flash warning">Your institution profile is awaiting administrator approval. Scholarship and post publishing are available after approval.</div>
+{% endif %}
 <div class="actions">
   <a class="button" href="{{ url_for('institution.public_profile', profile_id=profile.id) }}">View public profile</a>
   <a class="button secondary" href="{{ url_for('institution.edit') }}">Edit profile</a>
-  <a class="button secondary" href="{{ url_for('scholarships.create') }}">Submit scholarship</a>
+  {% if profile.verification_status == 'approved' %}
+    <a class="button secondary" href="{{ url_for('scholarships.create') }}">Publish scholarship</a>
+  {% endif %}
   <a class="button secondary" href="{{ url_for('institution.applications') }}">Review applications ({{ application_count }})</a>
 </div>
 <section class="card">
@@ -17,16 +22,25 @@
       <span class="pill">{{ scholarship.applications|length }} applications</span>
     </div>
   {% else %}
-    <p class="muted">You have not submitted any scholarships yet.</p>
+    <p class="muted">You have not published any scholarships yet.</p>
   {% endfor %}
 </section>
 <section class="card">
   <h2>Create a post</h2>
-  <form method="post" action="{{ url_for('social.create_post') }}">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <textarea name="content" required placeholder="Share an institutional update..."></textarea>
-    <button class="button">Publish post</button>
-  </form>
+  {% if profile.verification_status == 'approved' %}
+    <form method="post" action="{{ url_for('social.create_post') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <textarea name="content" required maxlength="5000" placeholder="Share an institutional update..."></textarea>
+      <label for="post-visibility">Who can see this post?</label>
+      <select id="post-visibility" name="visibility" required>
+        <option value="public">Everyone — including visitors without accounts</option>
+        <option value="accepted_applicants">Only students whose applications have been accepted</option>
+      </select>
+      <button class="button">Publish post</button>
+    </form>
+  {% else %}
+    <p class="muted">Post publishing will be enabled after administrator approval.</p>
+  {% endif %}
 </section>
-<p class="muted">Scholarship publication requires administrator approval. Only applications submitted to your institution's scholarships are visible in your application workspace.</p>
+<p class="muted">Approved institutions can publish scholarships immediately. Published scholarships are visible to all visitors without requiring an account.</p>
 {% endblock %}
