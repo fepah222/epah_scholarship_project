@@ -1,3 +1,4 @@
+import re
 import uuid
 from datetime import datetime, timezone
 
@@ -27,12 +28,21 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for("home"))
     if request.method == "POST":
-        role = request.form.get("role", "student")
+        role = request.form.get("role", "student").strip()
         name = request.form.get("full_name", "").strip()
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
-        if role not in ("student", "institution") or not name or not email or len(password) < 8:
-            flash("Complete all required fields. Password must contain at least 8 characters.", "danger")
+        confirm_password = request.form.get("confirm_password", "")
+        valid_email = re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email) is not None
+
+        if role not in ("student", "institution"):
+            flash("Choose a valid account type.", "danger")
+        elif not name or len(name) > 140 or not valid_email:
+            flash("Enter a valid name and email address.", "danger")
+        elif len(password) < 12:
+            flash("Your password must contain at least 12 characters.", "danger")
+        elif password != confirm_password:
+            flash("Your passwords do not match.", "danger")
         elif User.query.filter_by(email=email).first():
             flash("An account with that email already exists.", "danger")
         else:
