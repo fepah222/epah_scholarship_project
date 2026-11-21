@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from flask import Flask, render_template
+from flask import Flask, render_template, send_from_directory
 from sqlalchemy import text
 
 from config import Config
@@ -23,15 +23,12 @@ def create_app(config_class=Config):
     socketio.init_app(app, async_mode="threading")
     csrf.init_app(app)
 
-    # Import every model before create_all so all foreign-key targets are
-    # registered in the same SQLAlchemy metadata collection.
     from . import models  # noqa: F401
     from .routes import register_blueprints
 
     register_blueprints(app)
 
     from .sockets.events import register_socket_events
-
     register_socket_events(socketio)
 
     @app.get("/")
@@ -40,21 +37,20 @@ def create_app(config_class=Config):
 
         scholarships = (
             Scholarship.query.filter_by(approval_status="approved", publication_status="published")
-            .order_by(Scholarship.created_at.desc())
-            .limit(6)
-            .all()
+            .order_by(Scholarship.created_at.desc()).limit(6).all()
         )
         institutions = (
             InstitutionProfile.query.filter_by(verification_status="approved")
-            .order_by(InstitutionProfile.created_at.desc())
-            .limit(6)
-            .all()
+            .order_by(InstitutionProfile.created_at.desc()).limit(6).all()
         )
         return render_template("public/home.html", scholarships=scholarships, institutions=institutions)
 
+    @app.get("/media/<path:filename>")
+    def media_file(filename):
+        return send_from_directory(app.config["PUBLIC_UPLOAD"], filename)
+
     @app.get("/health")
     def health():
-        # Check the configured database connection, not just Flask's routing.
         db.session.execute(text("SELECT 1"))
         return {
             "status": "ok",
@@ -92,20 +88,14 @@ def create_app(config_class=Config):
             raise click.ClickException("That email address is already registered.")
 
         user = User(
-            id=str(uuid.uuid4()),
-            full_name=full_name,
-            email=email,
-            password_hash=generate_password_hash(password),
-            role="admin",
-            account_status="active",
-            email_verified=True,
+            id=str(uuid.uuid4()), full_name=full_name, email=email,
+            password_hash=generate_password_hash(password), role="admin",
+            account_status="active", email_verified=True,
         )
         db.session.add(user)
         db.session.commit()
         click.echo("First Epah Scholarship administrator created successfully.")
 
-    # create_all is appropriate for a fresh local development database. Use
-    # Flask-Migrate for schema changes after deployment or once data matters.
     with app.app_context():
         db.create_all()
 
