@@ -1,1 +1,32 @@
-{% extends 'base.html' %}{% block content %}<p class="eyebrow">INSTITUTION WORKSPACE</p><h1>{{ profile.institution_name }}</h1><p>Verification status: <span class="pill">{{ profile.verification_status }}</span></p><div class="actions"><a class="button" href="{{ url_for('institution.public_profile',profile_id=profile.id) }}">View public profile</a><a class="button secondary" href="{{ url_for('institution.edit') }}">Edit profile</a><a class="button secondary" href="{{ url_for('scholarships.create') }}">Submit scholarship</a></div><section class="card"><h2>Create a post</h2><form method="post" action="{{ url_for('social.create_post') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><textarea name="content" required placeholder="Share an institutional update..."></textarea><button class="button">Publish post</button></form></section><p class="muted">Complete your profile and submit verification documents through the institution profile workflow. Scholarship publication requires administrator approval.</p>{% endblock %}
+{% extends 'base.html' %}
+{% block content %}
+<p class="eyebrow">INSTITUTION WORKSPACE</p>
+<h1>{{ profile.institution_name }}</h1>
+<p>Verification status: <span class="pill">{{ profile.verification_status }}</span></p>
+<div class="actions">
+  <a class="button" href="{{ url_for('institution.public_profile', profile_id=profile.id) }}">View public profile</a>
+  <a class="button secondary" href="{{ url_for('institution.edit') }}">Edit profile</a>
+  <a class="button secondary" href="{{ url_for('scholarships.create') }}">Submit scholarship</a>
+  <a class="button secondary" href="{{ url_for('institution.applications') }}">Review applications ({{ application_count }})</a>
+</div>
+<section class="card">
+  <h2>Your scholarships</h2>
+  {% for scholarship in scholarships %}
+    <div class="section-heading">
+      <div><h3>{{ scholarship.title }}</h3><small>{{ scholarship.approval_status }} · {{ scholarship.publication_status }}</small></div>
+      <span class="pill">{{ scholarship.applications|length }} applications</span>
+    </div>
+  {% else %}
+    <p class="muted">You have not submitted any scholarships yet.</p>
+  {% endfor %}
+</section>
+<section class="card">
+  <h2>Create a post</h2>
+  <form method="post" action="{{ url_for('social.create_post') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <textarea name="content" required placeholder="Share an institutional update..."></textarea>
+    <button class="button">Publish post</button>
+  </form>
+</section>
+<p class="muted">Scholarship publication requires administrator approval. Only applications submitted to your institution's scholarships are visible in your application workspace.</p>
+{% endblock %}
