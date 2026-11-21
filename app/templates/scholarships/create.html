@@ -1,1 +1,30 @@
-{% extends 'base.html' %}{% block content %}<div class="form-wrap wide"><h1>Submit a scholarship</h1><p class="muted">Submissions are reviewed by an administrator before publication.</p><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>Title<input name="title" required></label><label>Description<textarea name="description" required></textarea></label><label>Category<input name="category"></label><label>Funding type<select name="funding_type"><option>Fully funded</option><option>Partially funded</option><option>Tuition support</option><option>Other</option></select></label><label>Eligibility<textarea name="eligibility"></textarea></label><button class="button">Submit for review</button></form></div>{% endblock %}
+{% extends 'base.html' %}
+{% block content %}
+<div class="form-wrap wide">
+  <h1>Submit a scholarship</h1>
+  <p class="muted">Provide accurate details. An administrator must approve the scholarship before it appears publicly.</p>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Scholarship title<input name="title" maxlength="220" required></label>
+    <label>Description<textarea name="description" required></textarea></label>
+    <label>Category<input name="category" placeholder="Undergraduate, postgraduate, research..."></label>
+    <label>Funding type
+      <select name="funding_type">
+        <option value="">Select funding type</option><option>Fully funded</option><option>Partially funded</option><option>Tuition support</option><option>Other</option>
+      </select>
+    </label>
+    <label>Benefits<textarea name="benefits" placeholder="Tuition, accommodation, stipend, travel..."></textarea></label>
+    <label>Eligibility criteria<textarea name="eligibility"></textarea></label>
+    <label>Academic requirements<textarea name="academic_requirements"></textarea></label>
+    <label>Eligible countries<input name="country_eligibility" placeholder="All countries or list eligible countries"></label>
+    <div class="cards">
+      <label>Application opens<input type="date" name="application_open_date"></label>
+      <label>Application deadline<input type="date" name="application_deadline"></label>
+      <label>Available positions<input type="number" name="available_positions" min="1" step="1"></label>
+    </div>
+    <label>External application URL (optional)<input type="url" name="external_application_url" placeholder="https://..."></label>
+    <p class="muted">If an external URL is provided, students will be directed to the institution's application process rather than submitting through this platform.</p>
+    <button class="button" type="submit">Submit for review</button>
+  </form>
+</div>
+{% endblock %}
