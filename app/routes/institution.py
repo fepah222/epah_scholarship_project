@@ -5,6 +5,7 @@ from flask_login import login_required, current_user
 
 from ..extensions import db
 from ..models import InstitutionProfile, Post, InstitutionFollow, Scholarship, Application
+from ..uploads import save_public_image, remove_public_image
 
 bp = Blueprint("institution", __name__, url_prefix="/institutions")
 
@@ -72,7 +73,8 @@ def review_application(application_id):
     else:
         application.application_status = new_status
         application.reviewer_comment = request.form.get("reviewer_comment", "").strip() or None
-        application.reviewed_at = db.func.current_timestamp()
+        from datetime import datetime, timezone
+        application.reviewed_at = datetime.now(timezone.utc)
         db.session.commit()
         flash("Application review saved.", "success")
     return redirect(url_for("institution.applications"))
@@ -82,7 +84,7 @@ def review_application(application_id):
 @login_required
 def edit():
     profile = own_profile()
-    if not profile:
+    if current_user.role != "institution" or not profile:
         return redirect(url_for("home"))
     if request.method == "POST":
         for field in (
@@ -91,6 +93,19 @@ def edit():
             "mission", "vision", "academic_programmes"
         ):
             setattr(profile, field, request.form.get(field, "").strip())
+        for field, attribute, folder in (
+            ("logo_image", "logo_path", "institution-logos"),
+            ("cover_image", "cover_photo_path", "institution-covers"),
+        ):
+            upload = request.files.get(field)
+            if upload and upload.filename:
+                try:
+                    new_path = save_public_image(upload, folder)
+                except ValueError as error:
+                    flash(str(error), "danger")
+                    return render_template("institution/edit.html", profile=profile), 400
+                remove_public_image(getattr(profile, attribute))
+                setattr(profile, attribute, new_path)
         db.session.commit()
         flash("Institution profile updated.", "success")
         return redirect(url_for("institution.dashboard"))
@@ -100,7 +115,7 @@ def edit():
 @bp.get("/<string:profile_id>")
 def public_profile(profile_id):
     profile = db.session.get(InstitutionProfile, profile_id)
-    if not profile:
+    if not profile or profile.verification_status != "approved":
         return render_template("errors/404.html"), 404
     posts = (
         Post.query.filter_by(institution_id=profile.id, publication_status="published")
