@@ -137,3 +137,50 @@ def test_admin_login_is_role_restricted(client, app):
             follow_redirects=True,
         )
         assert b"Invalid administrator credentials" in response.data
+
+
+def test_guest_can_follow_external_application_link(client, app):
+    with app.app_context():
+        _, _, _, _, scholarship = scholarship_setup()
+        scholarship.application_method = "external"
+        scholarship.external_application_url = "https://example.org/apply"
+        db.session.commit()
+        response = client.get(f"/scholarships/{scholarship.slug}")
+        assert response.status_code == 200
+        assert b"https://example.org/apply" in response.data
+        assert b"do not need an Epah Scholarship account" in response.data
+
+
+def test_profile_image_upload_rejects_invalid_file(app):
+    from io import BytesIO
+    from werkzeug.datastructures import FileStorage
+    from app.uploads import save_public_image
+
+    with app.app_context():
+        invalid = FileStorage(
+            stream=BytesIO(b"this is not a png"),
+            filename="not-an-image.png",
+            content_type="image/png",
+        )
+        try:
+            save_public_image(invalid, "test")
+            assert False, "Invalid image content should be rejected"
+        except ValueError:
+            pass
+
+
+def test_profile_image_upload_accepts_png_signature(app):
+    from io import BytesIO
+    from werkzeug.datastructures import FileStorage
+    from pathlib import Path
+    from app.uploads import save_public_image
+
+    with app.app_context():
+        image = FileStorage(
+            stream=BytesIO(b"\\x89PNG\\r\\n\\x1a\\n" + b"test-image-data"),
+            filename="profile.png",
+            content_type="image/png",
+        )
+        saved = save_public_image(image, "test")
+        assert saved.startswith("test/")
+        assert (Path(app.config["PUBLIC_UPLOAD"]) / saved).is_file()
