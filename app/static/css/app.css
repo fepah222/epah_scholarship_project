@@ -65,7 +65,7 @@
   min-height:650px;position:relative;display:flex;align-items:center;overflow:hidden;
   padding:clamp(34px,5vw,70px);border:0;border-radius:7px;color:#fff;
   background-color:#123b25;
-  background-image:linear-gradient(90deg,rgba(5,35,19,.94) 0%,rgba(7,48,26,.86) 37%,rgba(8,43,24,.38) 67%,rgba(8,35,20,.12) 100%),url("/static/images/epah-campus-hero.webp");
+  background-image:linear-gradient(90deg,rgba(5,35,19,.94) 0%,rgba(7,48,26,.86) 37%,rgba(8,43,24,.38) 67%,rgba(8,35,20,.12) 100%),url("/static/epah-campus-hero.webp");
   background-size:cover;background-position:center 48%;box-shadow:var(--shadow);
 }
 .campus-hero:before{content:"";position:absolute;inset:0;pointer-events:none;border:1px solid rgba(255,255,255,.17);background:linear-gradient(135deg,transparent 70%,rgba(220,178,57,.18))}
@@ -94,7 +94,7 @@
 @media(max-width:850px){.campus-hero{min-height:590px;padding:38px 30px;background-position:58% center}.campus-hero-copy{width:min(570px,78%)}.campus-hero h1{font-size:clamp(43px,7vw,61px)}}
 @media(max-width:620px){
   .campus-hero{min-height:690px;display:flex;align-items:flex-start;padding:29px 19px 74px;border-radius:5px;background-position:62% center;
-    background-image:linear-gradient(180deg,rgba(4,31,17,.91) 0%,rgba(5,40,22,.79) 42%,rgba(5,37,21,.43) 73%,rgba(5,34,19,.58) 100%),url("/static/images/epah-campus-hero.webp")}
+    background-image:linear-gradient(180deg,rgba(4,31,17,.91) 0%,rgba(5,40,22,.79) 42%,rgba(5,37,21,.43) 73%,rgba(5,34,19,.58) 100%),url("/static/epah-campus-hero.webp")}
   .campus-hero:after{right:-105px;bottom:-175px;width:105%;height:205px}
   .campus-hero-copy{width:100%;max-width:440px}
   .campus-hero h1{font-size:clamp(42px,11vw,55px);line-height:1.01;margin:25px 0 15px;letter-spacing:-1.2px}
