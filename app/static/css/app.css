@@ -313,3 +313,58 @@
   .brand { min-width:0; }
   .topbar { gap:5px; }
 }
+
+
+/* Header layout correction: one theme control per viewport, no overlapping nav. */
+@media(max-width:850px) {
+  .topbar {
+    display:flex;
+    flex-wrap:nowrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    min-width:0;
+    overflow-x:auto;
+    overflow-y:visible;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+  }
+  .topbar::-webkit-scrollbar { display:none; }
+  .topbar > .desktop-nav { display:none !important; }
+  .topbar > .mobile-theme-toggle { display:flex !important; }
+  .topbar > .mobile-menu { display:block !important; flex:0 0 auto; }
+  .topbar > .brand {
+    flex:0 1 auto;
+    min-width:0;
+    max-width:calc(100% - 145px);
+    overflow:hidden;
+    white-space:nowrap;
+  }
+  .topbar > .brand > span:last-child {
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .topbar > .brand small {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .topbar > .mobile-theme-toggle {
+    flex:0 0 36px;
+    margin-left:auto;
+  }
+}
+@media(min-width:851px) {
+  .topbar > .mobile-theme-toggle,
+  .topbar > .mobile-menu { display:none !important; }
+  .topbar > .desktop-nav { display:flex !important; }
+}
+@media(max-width:380px) {
+  .topbar { padding-left:10px; padding-right:10px; gap:6px; }
+  .topbar > .brand { max-width:calc(100% - 132px); gap:7px; font-size:14px; }
+  .topbar > .brand .brand-mark { width:33px; height:33px; flex:0 0 33px; }
+  .topbar > .brand small { font-size:7px; letter-spacing:1px; }
+  .topbar > .mobile-theme-toggle { flex-basis:33px; width:33px; height:33px; }
+  .mobile-menu > summary { min-width:54px; padding-left:7px; padding-right:7px; }
+}
