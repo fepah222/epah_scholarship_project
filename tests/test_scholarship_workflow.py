@@ -86,3 +86,54 @@ def test_student_cannot_access_institution_application_review(client, app):
         response = client.get("/institutions/applications")
 
         assert response.status_code == 403
+
+
+def test_public_can_browse_published_scholarships(client, app):
+    with app.app_context():
+        _, _, _, _, scholarship = scholarship_setup()
+        response = client.get("/scholarships/")
+        assert response.status_code == 200
+        assert scholarship.title.encode() in response.data
+
+
+def test_student_dashboard_lists_all_published_scholarships(client, app):
+    with app.app_context():
+        _, _, student_user, _, first = scholarship_setup()
+        second = Scholarship(
+            id=str(uuid.uuid4()), institution_id=first.institution_id,
+            title="Second Public Scholarship", slug="second-public-scholarship",
+            description="Another public opportunity.",
+            approval_status="approved", publication_status="published",
+        )
+        db.session.add(second)
+        db.session.commit()
+        login_as(client, student_user)
+        response = client.get("/student/dashboard")
+        assert response.status_code == 200
+        assert first.title.encode() in response.data
+        assert second.title.encode() in response.data
+
+
+def test_admin_login_is_role_restricted(client, app):
+    with app.app_context():
+        admin = make_user("admin", "Site Administrator", "admin@example.test")
+        admin.set_password("StrongAdminPassword123!")
+        db.session.commit()
+        response = client.post(
+            "/auth/admin-login",
+            data={"email": admin.email, "password": "StrongAdminPassword123!"},
+            follow_redirects=True,
+        )
+        assert response.status_code == 200
+        assert b"Admin" in response.data or b"Pending" in response.data
+
+        client.post("/auth/logout")
+        student = make_user("student", "Ordinary Student", "ordinary@example.test")
+        student.set_password("StudentPassword123!")
+        db.session.commit()
+        response = client.post(
+            "/auth/admin-login",
+            data={"email": student.email, "password": "StudentPassword123!"},
+            follow_redirects=True,
+        )
+        assert b"Invalid administrator credentials" in response.data
