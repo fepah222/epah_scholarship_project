@@ -7,18 +7,25 @@
   <div class="stat"><strong>{{ applications }}</strong><span>Applications</span></div>
   <div class="stat"><strong>{{ saved }}</strong><span>Saved scholarships</span></div>
 </div>
-<div class="actions"><a class="button secondary" href="{{ url_for('student.applications') }}">View application history</a><a class="button secondary" href="{{ url_for('student.edit_profile') }}">Edit profile</a></div>
-<div class="section-heading"><h2>Scholarships for you</h2><a href="{{ url_for('scholarships.index') }}">Browse all →</a></div>
+<div class="actions">
+  <a class="button secondary" href="{{ url_for('student.applications') }}">View application history</a>
+  <a class="button secondary" href="{{ url_for('student.edit_profile') }}">Edit profile</a>
+  <a class="button" href="{{ url_for('scholarships.index') }}">Browse all scholarships</a>
+</div>
+<div class="section-heading"><h2>All available scholarships</h2><a href="{{ url_for('scholarships.index') }}">Open directory →</a></div>
+<p class="muted">Showing all currently published opportunities. You can view scholarship details without signing in.</p>
 <div class="cards">
   {% for scholarship in scholarships %}
     <article class="card">
+      <span class="pill">{{ scholarship.funding_type or 'Opportunity' }}</span>
       <h3>{{ scholarship.title }}</h3>
-      <p>{{ scholarship.description|truncate(130) }}</p>
+      <p>{{ scholarship.description|truncate(150) }}</p>
       <small>{{ scholarship.institution.institution_name }}</small>
-      <a class="text-link" href="{{ url_for('scholarships.detail', slug=scholarship.slug) }}">View opportunity →</a>
+      {% if scholarship.application_deadline %}<p><small>Deadline: {{ scholarship.application_deadline.strftime('%d %b %Y') }}</small></p>{% endif %}
+      <a class="text-link" href="{{ url_for('scholarships.detail', slug=scholarship.slug) }}">View opportunity and apply →</a>
     </article>
   {% else %}
-    <p class="muted">No published scholarships yet.</p>
+    <p class="muted">No published scholarships yet. Please check again later.</p>
   {% endfor %}
 </div>
 {% endblock %}
