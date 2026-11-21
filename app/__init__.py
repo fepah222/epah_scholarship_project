@@ -36,8 +36,11 @@ def create_app(config_class=Config):
         from .models import InstitutionProfile, Scholarship
 
         scholarships = (
-            Scholarship.query.filter_by(approval_status="approved", publication_status="published")
-            .order_by(Scholarship.created_at.desc()).limit(6).all()
+            Scholarship.query.join(InstitutionProfile).filter(
+                Scholarship.approval_status == "approved",
+                Scholarship.publication_status == "published",
+                InstitutionProfile.verification_status == "approved",
+            ).order_by(Scholarship.created_at.desc()).limit(6).all()
         )
         institutions = (
             InstitutionProfile.query.filter_by(verification_status="approved")
@@ -95,6 +98,41 @@ def create_app(config_class=Config):
         db.session.add(user)
         db.session.commit()
         click.echo("First Epah Scholarship administrator created successfully.")
+
+
+    @app.cli.command("setup-admin")
+    def setup_admin_command():
+        """Create or reset the designated administrator account interactively."""
+        import click
+        import uuid
+        from werkzeug.security import generate_password_hash
+        from .models import User
+
+        email = click.prompt("Administrator email", default="fepah@gmail.com").strip().lower()
+        user = User.query.filter_by(email=email).first()
+        if user and user.role != "admin":
+            raise click.ClickException("This email belongs to a non-administrator account. Use a different email.")
+        full_name = click.prompt(
+            "Administrator full name",
+            default=(user.full_name if user else "Epah Scholarship Administrator"),
+        ).strip()
+        password = click.prompt("New administrator password (minimum 12 characters)", hide_input=True, confirmation_prompt=True)
+        if len(password) < 12:
+            raise click.ClickException("Password must contain at least 12 characters.")
+        if user is None:
+            user = User(
+                id=str(uuid.uuid4()), full_name=full_name, email=email,
+                password_hash=generate_password_hash(password), role="admin",
+                account_status="active", email_verified=True,
+            )
+            db.session.add(user)
+        else:
+            user.full_name = full_name
+            user.password_hash = generate_password_hash(password)
+            user.account_status = "active"
+            user.email_verified = True
+        db.session.commit()
+        click.echo("Administrator account is ready. Sign in at /auth/admin-login.")
 
     with app.app_context():
         db.create_all()
