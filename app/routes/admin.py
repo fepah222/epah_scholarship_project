@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from ..extensions import db
 from ..models import InstitutionProfile, Scholarship, AdminAction
 import uuid
+from datetime import datetime, timezone
 bp=Blueprint('admin',__name__,url_prefix='/admin')
 def require_admin():
     if current_user.role!='admin': abort(403)
@@ -36,4 +37,4 @@ def review_scholarship(scholarship_id):
     if status not in ('approved','rejected'): abort(400)
     inst=s.institution
     if status=='approved' and inst.verification_status!='approved': flash('Verify the institution before approving its scholarship.','warning'); return redirect(url_for('admin.scholarships'))
-    s.approval_status=status; s.publication_status='published' if status=='approved' else 'draft'; s.rejection_reason=request.form.get('reason',''); s.approved_by=current_user.id if status=='approved' else None; db.session.commit(); flash('Scholarship review saved.','success'); return redirect(url_for('admin.scholarships'))
+    s.approval_status=status; s.publication_status='published' if status=='approved' else 'draft'; s.rejection_reason=request.form.get('reason',''); s.approved_by=current_user.id if status=='approved' else None; s.approved_at=datetime.now(timezone.utc) if status=='approved' else None; db.session.commit(); flash('Scholarship review saved.','success'); return redirect(url_for('admin.scholarships'))
